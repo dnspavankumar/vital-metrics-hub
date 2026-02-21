@@ -2,95 +2,131 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 187 55% 42%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 15% 93%;
+    --secondary-foreground: 215 25% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 14% 95%;
+    --muted-foreground: 215 12% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 37 90% 55%;
+    --accent-foreground: 30 80% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: 152 60% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 37 90% 55%;
+    --warning-foreground: 30 80% 15%;
+
+    --border: 214 20% 90%;
+    --input: 214 20% 90%;
+    --ring: 187 55% 42%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 210 18% 96%;
+    --sidebar-foreground: 215 20% 30%;
+    --sidebar-primary: 187 55% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 92%;
+    --sidebar-accent-foreground: 215 25% 15%;
+    --sidebar-border: 214 18% 90%;
+    --sidebar-ring: 187 55% 42%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --chart-1: 187 55% 42%;
+    --chart-2: 152 60% 40%;
+    --chart-3: 37 90% 55%;
+    --chart-4: 260 50% 55%;
+    --chart-5: 0 72% 51%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --kpi-patients: 187 55% 42%;
+    --kpi-beds: 260 50% 55%;
+    --kpi-icu: 0 72% 51%;
+    --kpi-oxygen: 152 60% 40%;
+    --kpi-doctors: 37 90% 55%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --landing-bg: 215 30% 12%;
+    --landing-foreground: 210 15% 90%;
+    --landing-muted: 215 20% 25%;
+    --landing-accent: 187 55% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 18% 10%;
+    --foreground: 210 15% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 16% 14%;
+    --card-foreground: 210 15% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 16% 14%;
+    --popover-foreground: 210 15% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 187 50% 48%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 210 15% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 14% 16%;
+    --muted-foreground: 215 10% 55%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 37 85% 50%;
+    --accent-foreground: 30 80% 15%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --success: 152 55% 38%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 37 85% 50%;
+    --warning-foreground: 30 80% 15%;
+
+    --border: 220 14% 20%;
+    --input: 220 14% 20%;
+    --ring: 187 50% 48%;
+
+    --sidebar-background: 220 20% 8%;
+    --sidebar-foreground: 210 12% 70%;
+    --sidebar-primary: 187 50% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 16% 14%;
+    --sidebar-accent-foreground: 210 15% 85%;
+    --sidebar-border: 220 14% 18%;
+    --sidebar-ring: 187 50% 48%;
+
+    --chart-1: 187 50% 48%;
+    --chart-2: 152 55% 38%;
+    --chart-3: 37 85% 50%;
+    --chart-4: 260 45% 55%;
+    --chart-5: 0 65% 45%;
+
+    --kpi-patients: 187 50% 48%;
+    --kpi-beds: 260 45% 55%;
+    --kpi-icu: 0 65% 45%;
+    --kpi-oxygen: 152 55% 38%;
+    --kpi-doctors: 37 85% 50%;
+
+    --landing-bg: 220 22% 7%;
+    --landing-foreground: 210 15% 88%;
+    --landing-muted: 220 16% 18%;
+    --landing-accent: 187 50% 48%;
   }
 }
 
@@ -100,6 +136,25 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
+}
+
+@layer utilities {
+  .kpi-shadow {
+    box-shadow: 0 1px 3px 0 hsl(var(--foreground) / 0.04), 0 1px 2px -1px hsl(var(--foreground) / 0.04);
+  }
+  .kpi-shadow-hover {
+    box-shadow: 0 4px 6px -1px hsl(var(--foreground) / 0.06), 0 2px 4px -2px hsl(var(--foreground) / 0.04);
+  }
+}
+
+/* Floating lines animation for landing */
+@keyframes float-line {
+  0%, 100% { transform: translateY(0) scaleX(1); opacity: 0.15; }
+  50% { transform: translateY(-20px) scaleX(1.02); opacity: 0.25; }
+}
+
+.animate-float-line {
+  animation: float-line 8s ease-in-out infinite;
 }
