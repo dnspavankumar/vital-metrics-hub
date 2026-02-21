@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Activity, ArrowRight, BarChart3, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import FloatingLines from "@/components/FloatingLines";
 
 const features = [
   {
@@ -25,19 +26,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-landing relative overflow-hidden">
-      {/* Floating lines background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-full h-px bg-landing-accent/10 animate-float-line"
-            style={{
-              top: `${15 + i * 14}%`,
-              animationDelay: `${i * 1.3}s`,
-              animationDuration: `${7 + i * 1.5}s`,
-            }}
-          />
-        ))}
+      {/* FloatingLines WebGL background */}
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
+        <FloatingLines
+          enabledWaves={["top", "middle", "bottom"]}
+          lineCount={5}
+          lineDistance={5}
+          bendRadius={5}
+          bendStrength={-0.5}
+          interactive={true}
+          parallax={true}
+        />
       </div>
 
       {/* Navigation */}
