@@ -57,6 +57,85 @@ const statusOptions: Patient["status"][] = [
   "Outpatient",
 ];
 
+type PatientFormData = {
+  name: string;
+  age: string;
+  diagnosis: string;
+  date: string;
+  status: Patient["status"];
+};
+
+type PatientFormProps = {
+  formData: PatientFormData;
+  setFormData: React.Dispatch<React.SetStateAction<PatientFormData>>;
+};
+
+function PatientForm({ formData, setFormData }: PatientFormProps) {
+  return (
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="name" className="text-right">Name *</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          className="col-span-3"
+          placeholder="Patient name"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="age" className="text-right">Age *</Label>
+        <Input
+          id="age"
+          type="number"
+          value={formData.age}
+          onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+          className="col-span-3"
+          placeholder="Patient age"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="diagnosis" className="text-right">Diagnosis *</Label>
+        <Input
+          id="diagnosis"
+          value={formData.diagnosis}
+          onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
+          className="col-span-3"
+          placeholder="Medical diagnosis"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="date" className="text-right">Admission Date</Label>
+        <Input
+          id="date"
+          type="date"
+          value={formData.date}
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          className="col-span-3"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="status" className="text-right">Status</Label>
+        <Select
+          value={formData.status}
+          onValueChange={(value) => setFormData({ ...formData, status: value as Patient["status"] })}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            {statusOptions.map((status) => (
+              <SelectItem key={status} value={status}>
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
 export default function Patients() {
   const { patients, loading, addPatient, updatePatient, deletePatient, bulkAddPatients } = useFirebase();
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,12 +147,12 @@ export default function Patients() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PatientFormData>({
     name: "",
     age: "",
     diagnosis: "",
     date: new Date().toISOString().split("T")[0],
-    status: "Admitted" as Patient["status"],
+    status: "Admitted",
   });
 
   // Filter patients based on search query
@@ -200,70 +279,6 @@ export default function Patients() {
     toast.success("Patients exported successfully");
   };
 
-  const PatientForm = ({ onSubmit, isEdit = false }: { onSubmit: () => void; isEdit?: boolean }) => (
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">Name *</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="col-span-3"
-          placeholder="Patient name"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="age" className="text-right">Age *</Label>
-        <Input
-          id="age"
-          type="number"
-          value={formData.age}
-          onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-          className="col-span-3"
-          placeholder="Patient age"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="diagnosis" className="text-right">Diagnosis *</Label>
-        <Input
-          id="diagnosis"
-          value={formData.diagnosis}
-          onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
-          className="col-span-3"
-          placeholder="Medical diagnosis"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="date" className="text-right">Admission Date</Label>
-        <Input
-          id="date"
-          type="date"
-          value={formData.date}
-          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-          className="col-span-3"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="status" className="text-right">Status</Label>
-        <Select
-          value={formData.status}
-          onValueChange={(value) => setFormData({ ...formData, status: value as Patient["status"] })}
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  );
-
   return (
     <DashboardLayout>
       <div className="space-y-5">
@@ -347,7 +362,7 @@ export default function Patients() {
                   Enter the patient details below.
                 </DialogDescription>
               </DialogHeader>
-              <PatientForm onSubmit={handleAddPatient} />
+              <PatientForm formData={formData} setFormData={setFormData} />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
                 <Button onClick={handleAddPatient}>Add Patient</Button>
@@ -431,7 +446,7 @@ export default function Patients() {
                 Update the patient details below.
               </DialogDescription>
             </DialogHeader>
-            <PatientForm onSubmit={handleEditPatient} isEdit />
+            <PatientForm formData={formData} setFormData={setFormData} />
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
               <Button onClick={handleEditPatient}>Save Changes</Button>

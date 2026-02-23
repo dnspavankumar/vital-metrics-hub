@@ -42,6 +42,104 @@ const recordTypes = [
   "Other",
 ];
 
+type RecordFormData = {
+  patientId: string;
+  patient: string;
+  type: string;
+  date: string;
+  doctor: string;
+  description: string;
+};
+
+type RecordFormProps = {
+  formData: RecordFormData;
+  setFormData: React.Dispatch<React.SetStateAction<RecordFormData>>;
+  patients: Array<{ id: string; name: string }>;
+  onPatientSelect: (patientId: string) => void;
+};
+
+function RecordForm({ formData, setFormData, patients, onPatientSelect }: RecordFormProps) {
+  return (
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="patient" className="text-right">Patient *</Label>
+        <div className="col-span-3">
+          <Select
+            value={formData.patientId}
+            onValueChange={onPatientSelect}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select patient" />
+            </SelectTrigger>
+            <SelectContent>
+              {patients.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name} ({p.id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {formData.patient && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Selected: {formData.patient}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="type" className="text-right">Type *</Label>
+        <div className="col-span-3">
+          <Select
+            value={formData.type}
+            onValueChange={(value) => setFormData({ ...formData, type: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select record type" />
+            </SelectTrigger>
+            <SelectContent>
+              {recordTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="date" className="text-right">Date</Label>
+        <Input
+          id="date"
+          type="date"
+          value={formData.date}
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          className="col-span-3"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="doctor" className="text-right">Doctor *</Label>
+        <Input
+          id="doctor"
+          value={formData.doctor}
+          onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+          className="col-span-3"
+          placeholder="Attending doctor"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="description" className="text-right">Description</Label>
+        <Input
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          className="col-span-3"
+          placeholder="Additional notes"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Records() {
   const { records, patients, loading, addRecord, updateRecord, deleteRecord, bulkAddRecords } = useFirebase();
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,7 +151,7 @@ export default function Records() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RecordFormData>({
     patientId: "",
     patient: "",
     type: "",
@@ -84,11 +182,11 @@ export default function Records() {
   const handlePatientSelect = (patientId: string) => {
     const patient = patients.find((p) => p.id === patientId);
     if (patient) {
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         patientId: patient.id,
         patient: patient.name,
-      });
+      }));
     }
   };
 
@@ -98,17 +196,21 @@ export default function Records() {
       return;
     }
 
+    const newRecord = {
+      patientId: formData.patientId,
+      patient: formData.patient,
+      type: formData.type,
+      date: formData.date,
+      doctor: formData.doctor,
+      description: formData.description,
+    };
+
+    // Close immediately after validation so dialog behavior is consistent.
+    setIsAddDialogOpen(false);
+
     try {
-      await addRecord({
-        patientId: formData.patientId,
-        patient: formData.patient,
-        type: formData.type,
-        date: formData.date,
-        doctor: formData.doctor,
-        description: formData.description,
-      });
+      await addRecord(newRecord);
       toast.success("Record added successfully");
-      setIsAddDialogOpen(false);
       resetForm();
     } catch (error) {
       toast.error("Failed to add record");
@@ -201,86 +303,6 @@ export default function Records() {
     toast.success("Records exported successfully");
   };
 
-  const RecordForm = ({ onSubmit }: { onSubmit: () => void }) => (
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="patient" className="text-right">Patient *</Label>
-        <div className="col-span-3">
-          <Select
-            value={formData.patientId}
-            onValueChange={handlePatientSelect}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select patient" />
-            </SelectTrigger>
-            <SelectContent>
-              {patients.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.name} ({p.id})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {formData.patient && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Selected: {formData.patient}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="type" className="text-right">Type *</Label>
-        <div className="col-span-3">
-          <Select
-            value={formData.type}
-            onValueChange={(value) => setFormData({ ...formData, type: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select record type" />
-            </SelectTrigger>
-            <SelectContent>
-              {recordTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="date" className="text-right">Date</Label>
-        <Input
-          id="date"
-          type="date"
-          value={formData.date}
-          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-          className="col-span-3"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="doctor" className="text-right">Doctor *</Label>
-        <Input
-          id="doctor"
-          value={formData.doctor}
-          onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-          className="col-span-3"
-          placeholder="Attending doctor"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="description" className="text-right">Description</Label>
-        <Input
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          className="col-span-3"
-          placeholder="Additional notes"
-        />
-      </div>
-    </div>
-  );
-
   return (
     <DashboardLayout>
       <div className="space-y-5">
@@ -361,7 +383,12 @@ export default function Records() {
                   Enter the medical record details below.
                 </DialogDescription>
               </DialogHeader>
-              <RecordForm onSubmit={handleAddRecord} />
+              <RecordForm
+                formData={formData}
+                setFormData={setFormData}
+                patients={patients}
+                onPatientSelect={handlePatientSelect}
+              />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
                 <Button onClick={handleAddRecord}>Add Record</Button>
@@ -429,7 +456,12 @@ export default function Records() {
                 Update the record details below.
               </DialogDescription>
             </DialogHeader>
-            <RecordForm onSubmit={handleEditRecord} />
+            <RecordForm
+              formData={formData}
+              setFormData={setFormData}
+              patients={patients}
+              onPatientSelect={handlePatientSelect}
+            />
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
               <Button onClick={handleEditRecord}>Save Changes</Button>

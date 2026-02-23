@@ -40,6 +40,112 @@ const roles: Staff["role"][] = ["Doctor", "Nurse", "Technician", "Admin"];
 const shifts: Staff["shift"][] = ["Morning", "Afternoon", "Night"];
 const departments = ["ER", "ICU", "General", "Surgery", "Lab", "Pharmacy", "Radiology", "Admin"];
 
+type StaffFormData = {
+  name: string;
+  role: Staff["role"];
+  department: string;
+  shift: Staff["shift"];
+  phone: string;
+  email: string;
+};
+
+type StaffFormProps = {
+  formData: StaffFormData;
+  setFormData: React.Dispatch<React.SetStateAction<StaffFormData>>;
+};
+
+function StaffForm({ formData, setFormData }: StaffFormProps) {
+  return (
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="name" className="text-right">Name *</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          className="col-span-3"
+          placeholder="Staff member name"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="role" className="text-right">Role *</Label>
+        <Select
+          value={formData.role}
+          onValueChange={(value) => setFormData({ ...formData, role: value as Staff["role"] })}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            {roles.map((role) => (
+              <SelectItem key={role} value={role}>
+                {role}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="department" className="text-right">Department *</Label>
+        <Select
+          value={formData.department}
+          onValueChange={(value) => setFormData({ ...formData, department: value })}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select department" />
+          </SelectTrigger>
+          <SelectContent>
+            {departments.map((dept) => (
+              <SelectItem key={dept} value={dept}>
+                {dept}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="shift" className="text-right">Shift</Label>
+        <Select
+          value={formData.shift}
+          onValueChange={(value) => setFormData({ ...formData, shift: value as Staff["shift"] })}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select shift" />
+          </SelectTrigger>
+          <SelectContent>
+            {shifts.map((shift) => (
+              <SelectItem key={shift} value={shift}>
+                {shift}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="phone" className="text-right">Phone</Label>
+        <Input
+          id="phone"
+          value={formData.phone}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          className="col-span-3"
+          placeholder="Contact number"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="email" className="text-right">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          className="col-span-3"
+          placeholder="Email address"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function StaffManagement() {
   const { staff, loading, addStaff, updateStaff, deleteStaff, bulkAddStaff } = useFirebase();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -50,11 +156,11 @@ export default function StaffManagement() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<StaffFormData>({
     name: "",
-    role: "Nurse" as Staff["role"],
+    role: "Nurse",
     department: "",
-    shift: "Morning" as Staff["shift"],
+    shift: "Morning",
     phone: "",
     email: "",
   });
@@ -212,96 +318,6 @@ export default function StaffManagement() {
     toast.success("Staff exported successfully");
   };
 
-  const StaffForm = ({ onSubmit }: { onSubmit: () => void }) => (
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="name" className="text-right">Name *</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="col-span-3"
-          placeholder="Staff member name"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="role" className="text-right">Role *</Label>
-        <Select
-          value={formData.role}
-          onValueChange={(value) => setFormData({ ...formData, role: value as Staff["role"] })}
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select role" />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map((role) => (
-              <SelectItem key={role} value={role}>
-                {role}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="department" className="text-right">Department *</Label>
-        <Select
-          value={formData.department}
-          onValueChange={(value) => setFormData({ ...formData, department: value })}
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select department" />
-          </SelectTrigger>
-          <SelectContent>
-            {departments.map((dept) => (
-              <SelectItem key={dept} value={dept}>
-                {dept}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="shift" className="text-right">Shift</Label>
-        <Select
-          value={formData.shift}
-          onValueChange={(value) => setFormData({ ...formData, shift: value as Staff["shift"] })}
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select shift" />
-          </SelectTrigger>
-          <SelectContent>
-            {shifts.map((shift) => (
-              <SelectItem key={shift} value={shift}>
-                {shift}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="phone" className="text-right">Phone</Label>
-        <Input
-          id="phone"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          className="col-span-3"
-          placeholder="Contact number"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="email" className="text-right">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="col-span-3"
-          placeholder="Email address"
-        />
-      </div>
-    </div>
-  );
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -387,7 +403,7 @@ export default function StaffManagement() {
                   Enter the staff details below.
                 </DialogDescription>
               </DialogHeader>
-              <StaffForm onSubmit={handleAddStaff} />
+              <StaffForm formData={formData} setFormData={setFormData} />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
                 <Button onClick={handleAddStaff}>Add Staff</Button>
@@ -533,7 +549,7 @@ export default function StaffManagement() {
                 Update the staff details below.
               </DialogDescription>
             </DialogHeader>
-            <StaffForm onSubmit={handleEditStaff} />
+            <StaffForm formData={formData} setFormData={setFormData} />
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
               <Button onClick={handleEditStaff}>Save Changes</Button>
