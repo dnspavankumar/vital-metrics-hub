@@ -3,10 +3,11 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { UserCog, Users, Clock, Plus, Upload, Download, FileSpreadsheet, Trash2, Edit, Loader2 } from "lucide-react";
+import { UserCog, Users, Clock, Plus, Upload, Download, FileSpreadsheet, Trash2, Edit, Loader2, Sparkles } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -34,6 +35,7 @@ import {
   parseStaffFromExcel,
   downloadStaffTemplate,
 } from "@/lib/excelUtils";
+import { askGroq } from "@/lib/groq";
 import { toast } from "sonner";
 
 const roles: Staff["role"][] = ["Doctor", "Nurse", "Technician", "Admin"];
@@ -153,6 +155,9 @@ export default function StaffManagement() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("Which departments are understaffed and what should we do first?");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
@@ -208,6 +213,62 @@ export default function StaffManagement() {
     doctors: staff.filter(s => s.shift === shift && s.role === "Doctor").length,
     nurses: staff.filter(s => s.shift === shift && s.role === "Nurse").length,
   }));
+
+  const departmentGaps = departmentData.map((d) => ({
+    department: d.dept,
+    doctors: d.doctors,
+    requiredDoctors: d.required_doctors,
+    doctorGap: d.required_doctors - d.doctors,
+    nurses: d.nurses,
+    requiredNurses: d.required_nurses,
+    nurseGap: d.required_nurses - d.nurses,
+  }));
+
+  const staffingContext = {
+    totals: {
+      totalStaff,
+      doctorsCount,
+      nursesCount,
+      onDutyNow,
+    },
+    byDepartment: departmentGaps,
+    byShift: shiftChart,
+    sampleStaff: staff.slice(0, 40).map((member) => ({
+      name: member.name,
+      role: member.role,
+      department: member.department,
+      shift: member.shift,
+    })),
+  };
+
+  const handleAskStaffAI = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Please enter a staffing question");
+      return;
+    }
+
+    setIsAiLoading(true);
+    try {
+      const answer = await askGroq({
+        systemPrompt: [
+          "You are a hospital workforce planning assistant.",
+          "Use the provided staffing data to answer in natural language.",
+          "Prioritize departments and shifts by risk and give practical, short recommendations.",
+          "If information is incomplete, state assumptions clearly.",
+        ].join(" "),
+        userPrompt: aiPrompt.trim(),
+        context: staffingContext,
+        temperature: 0.3,
+        maxTokens: 500,
+      });
+      setAiAnswer(answer);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to generate staffing response";
+      toast.error(message);
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
   const handleAddStaff = async () => {
     if (!formData.name || !formData.department) {
@@ -345,6 +406,43 @@ export default function StaffManagement() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="bg-card border border-border rounded-lg p-5 space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold">AI Staffing Assistant</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ask workforce questions and get natural language recommendations from current staffing data.
+            </p>
+          </div>
+          <Textarea
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="Example: How should we rebalance doctor and nurse coverage for the next 7 days?"
+            className="min-h-[96px]"
+          />
+          <div className="flex justify-end">
+            <Button onClick={handleAskStaffAI} disabled={isAiLoading} className="gap-2">
+              {isAiLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Generating
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" /> Generate Staffing Plan
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="rounded-md border border-border bg-secondary/30 p-4">
+            {aiAnswer ? (
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                AI response will appear here after you submit a staffing question.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-3">

@@ -9,6 +9,7 @@ An intelligent health records and operational analytics platform for hospital ma
 - **Infrastructure Planning**: Predict bed utilization, oxygen demand, and staffing requirements
 - **Excel Integration**: Import and export data via Excel files
 - **Firebase Backend**: Real-time data synchronization with Firebase Firestore
+- **Groq LLM Assistant**: Natural-language analytics and staffing recommendations
 
 ## Tech Stack
 
@@ -52,6 +53,8 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
+VITE_GROQ_API_KEY=your_groq_api_key
+VITE_GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 5. Set Firestore Rules (for development):
@@ -220,6 +223,8 @@ npm run build
 | `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
 | `VITE_FIREBASE_APP_ID` | Firebase app ID |
+| `VITE_GROQ_API_KEY` | Groq API key for AI assistant features |
+| `VITE_GROQ_MODEL` | Optional Groq model (default: `llama-3.3-70b-versatile`) |
 
 ## License
 

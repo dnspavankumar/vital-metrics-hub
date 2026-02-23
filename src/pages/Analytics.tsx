@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Download, Loader2, Sparkles } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import { useFirebase } from "@/contexts/FirebaseContext";
 import { exportAllToExcel } from "@/lib/excelUtils";
+import { askGroq } from "@/lib/groq";
 import { toast } from "sonner";
 import { collection, getDocs, query, orderBy, limit, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -37,6 +39,9 @@ export default function Analytics() {
   const { patients, resources, loading } = useFirebase();
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+  const [aiPrompt, setAiPrompt] = useState("What are the key operational risks and actions for this week?");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   // Calculate diagnosis distribution from patients
   const diagnosisMap = new Map<string, number>();
@@ -149,9 +154,63 @@ export default function Analytics() {
     },
   ];
 
+  const bedResource = resources.find((r) => r.name === "Beds");
+  const icuResource = resources.find((r) => r.name === "ICU");
+  const oxygenResource = resources.find((r) => r.name === "Oâ‚‚ Cylinders");
+
+  const analyticsContext = {
+    totals: {
+      activePatients: totalPatients,
+      totalPatientsInDatabase: patients.length,
+      icuPatients,
+      respiratoryCases,
+    },
+    capacity: {
+      bedsUsed: bedResource?.used ?? null,
+      bedsTotal: bedResource?.total ?? null,
+      icuUsed: icuResource?.used ?? null,
+      icuTotal: icuResource?.total ?? null,
+      oxygenUsed: oxygenResource?.used ?? null,
+      oxygenTotal: oxygenResource?.total ?? null,
+    },
+    monthlyData,
+    diagnosisDistribution,
+    oxygenTrend,
+    predictions,
+  };
+
   const handleExport = () => {
     exportAllToExcel(patients, [], [], resources);
     toast.success("Analytics data exported successfully");
+  };
+
+  const handleAskAnalyticsAI = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error("Please enter a question for AI analysis");
+      return;
+    }
+
+    setIsAiLoading(true);
+    try {
+      const answer = await askGroq({
+        systemPrompt: [
+          "You are a hospital operations analytics assistant.",
+          "Answer with concrete actions based only on provided data.",
+          "If data is missing, say so clearly.",
+          "Keep response concise, with practical recommendations in plain language.",
+        ].join(" "),
+        userPrompt: aiPrompt.trim(),
+        context: analyticsContext,
+        temperature: 0.3,
+        maxTokens: 500,
+      });
+      setAiAnswer(answer);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to generate AI analytics response";
+      toast.error(message);
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   // Helper function to categorize diagnoses
@@ -270,6 +329,43 @@ export default function Analytics() {
                   <Bar dataKey="usage" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+
+            <div className="bg-card border border-border rounded-lg p-5 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold">AI Analytics Assistant</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Ask a natural language question and get a data-grounded operational response.
+                </p>
+              </div>
+              <Textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Example: Why are discharges lagging admissions, and what should we do this week?"
+                className="min-h-[96px]"
+              />
+              <div className="flex justify-end">
+                <Button onClick={handleAskAnalyticsAI} disabled={isAiLoading} className="gap-2">
+                  {isAiLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Generating
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" /> Generate Insight
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="rounded-md border border-border bg-secondary/30 p-4">
+                {aiAnswer ? (
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{aiAnswer}</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    AI response will appear here after you submit a question.
+                  </p>
+                )}
+              </div>
             </div>
           </>
         )}
